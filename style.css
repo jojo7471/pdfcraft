@@ -1275,6 +1275,10 @@ body {
     margin-top: 6px;
 }
 
+.download-options {
+    margin-bottom: 12px;
+}
+
 #tts-download {
     position: relative;
     overflow: hidden;

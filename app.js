@@ -935,13 +935,18 @@ async function downloadAsAudio() {
     }
 
     try {
-        showToast('Select this tab in the popup and check "Share tab audio", then click Share.', 'info');
+        const silentRecord = document.getElementById('tts-silent-record').checked;
+        const toastMsg = silentRecord
+            ? 'Select this tab in the popup, check "Share tab audio", then click Share. Audio will be recorded silently.'
+            : 'Select this tab in the popup, check "Share tab audio", then click Share.';
+        showToast(toastMsg, 'info');
         await new Promise(r => setTimeout(r, 800));
 
         // Request tab audio capture
+        // suppressLocalAudioPlayback: true = record without playing through speakers
         const stream = await navigator.mediaDevices.getDisplayMedia({
             video: { displaySurface: 'browser' },
-            audio: { suppressLocalAudioPlayback: false },
+            audio: { suppressLocalAudioPlayback: silentRecord },
             preferCurrentTab: true,
         });
 
@@ -968,7 +973,7 @@ async function downloadAsAudio() {
             if (e.data.size > 0) audioChunks.push(e.data);
         };
 
-        mediaRecorder.onstop = () => {
+        mediaRecorder.onstop = async () => {
             stream.getTracks().forEach(t => t.stop());
 
             if (audioChunks.length === 0) {
@@ -980,8 +985,32 @@ async function downloadAsAudio() {
 
             const blob = new Blob(audioChunks, { type: mimeType });
             const baseName = ttsFileName ? ttsFileName.replace(/\.pdf$/i, '') : 'pdfcraft-audio';
-            downloadBlob(blob, baseName + '.webm');
-            showToast(`Audio file downloaded! (${formatBytes(blob.size)})`, 'success');
+            const defaultName = baseName + '.webm';
+
+            // Prompt user for save location using File System Access API
+            try {
+                if (window.showSaveFilePicker) {
+                    const handle = await window.showSaveFilePicker({
+                        suggestedName: defaultName,
+                        types: [{
+                            description: 'WebM Audio',
+                            accept: { 'audio/webm': ['.webm'] },
+                        }],
+                    });
+                    const writable = await handle.createWritable();
+                    await writable.write(blob);
+                    await writable.close();
+                    showToast(`Audio saved as ${handle.name} (${formatBytes(blob.size)})`, 'success');
+                } else {
+                    // Fallback: auto-download
+                    downloadBlob(blob, defaultName);
+                    showToast(`Audio file downloaded! (${formatBytes(blob.size)})`, 'success');
+                }
+            } catch {
+                // Save dialog cancelled or unsupported — fall back to auto-download
+                downloadBlob(blob, defaultName);
+                showToast(`Audio file downloaded! (${formatBytes(blob.size)})`, 'success');
+            }
 
             isRecording = false;
             updateDownloadUI();
