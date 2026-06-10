@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=1200">
+    <title>OG Image Generator — PDFCraft</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { width: 1200px; height: 630px; overflow: hidden; }
+        .og-container {
+            width: 1200px;
+            height: 630px;
+            background: #0a0a0f;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+            position: relative;
+            overflow: hidden;
+        }
+        .og-bg {
+            position: absolute;
+            top: -200px;
+            right: -200px;
+            width: 800px;
+            height: 800px;
+            background: radial-gradient(circle, rgba(108,92,231,0.15) 0%, transparent 70%);
+            border-radius: 50%;
+        }
+        .og-bg-2 {
+            position: absolute;
+            bottom: -300px;
+            left: -100px;
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, rgba(6,182,212,0.1) 0%, transparent 70%);
+            border-radius: 50%;
+        }
+        .og-content {
+            position: relative;
+            z-index: 1;
+            text-align: center;
+            padding: 60px;
+        }
+        .og-logo {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 16px;
+            margin-bottom: 40px;
+        }
+        .og-logo-icon {
+            width: 64px;
+            height: 64px;
+            background: linear-gradient(135deg, #6c5ce7, #a855f7, #06b6d4);
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .og-logo-icon svg {
+            width: 36px;
+            height: 36px;
+        }
+        .og-logo-text {
+            font-size: 42px;
+            font-weight: 700;
+            color: #e8e8f0;
+            letter-spacing: -0.02em;
+        }
+        .og-logo-text strong {
+            background: linear-gradient(135deg, #6c5ce7, #a855f7, #06b6d4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .og-title {
+            font-size: 72px;
+            font-weight: 800;
+            letter-spacing: -0.03em;
+            line-height: 1.1;
+            margin-bottom: 24px;
+        }
+        .og-title .gradient {
+            background: linear-gradient(135deg, #6c5ce7, #a855f7, #06b6d4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .og-subtitle {
+            font-size: 28px;
+            color: #8888a0;
+            font-weight: 400;
+            margin-bottom: 40px;
+        }
+        .og-features {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+        }
+        .og-feature {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(108, 92, 231, 0.1);
+            border: 1px solid rgba(108, 92, 231, 0.2);
+            border-radius: 999px;
+            padding: 10px 20px;
+            color: #e8e8f0;
+            font-size: 18px;
+            font-weight: 500;
+        }
+        .og-feature svg {
+            width: 20px;
+            height: 20px;
+            color: #6c5ce7;
+        }
+        .og-badge {
+            position: absolute;
+            top: 40px;
+            right: 40px;
+            background: rgba(0, 210, 160, 0.12);
+            border: 1px solid rgba(0, 210, 160, 0.3);
+            color: #00d2a0;
+            padding: 8px 16px;
+            border-radius: 999px;
+            font-size: 16px;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+    <div class="og-container">
+        <div class="og-bg"></div>
+        <div class="og-bg-2"></div>
+        <div class="og-badge">100% Free & Private</div>
+        <div class="og-content">
+            <div class="og-logo">
+                <div class="og-logo-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                        <polyline points="14 2 14 8 20 8"/>
+                    </svg>
+                </div>
+                <div class="og-logo-text">PDF<strong>Craft</strong></div>
+            </div>
+            <h1 class="og-title">
+                All-in-One<br>
+                <span class="gradient">PDF Toolkit</span>
+            </h1>
+            <p class="og-subtitle">Merge, split, compress & convert — right in your browser</p>
+            <div class="og-features">
+                <div class="og-feature">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+                    Merge
+                </div>
+                <div class="og-feature">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14"/><path d="M12 5l7 7-7 7"/></svg>
+                    Split
+                </div>
+                <div class="og-feature">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="4 14 10 14 10 20"/><polyline points="20 10 14 10 14 4"/></svg>
+                    Compress
+                </div>
+                <div class="og-feature">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 3 21 3 21 8"/><line x1="4" y1="20" x2="21" y2="3"/></svg>
+                    Convert
+                </div>
+                <div class="og-feature">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/></svg>
+                    Read Aloud
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

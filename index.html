@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PDFCraft — Free Online PDF Toolkit | Merge, Split, Compress & Convert PDFs</title>
+    <meta name="description" content="Free online PDF toolkit — merge, split, compress, convert PDFs and images. 100% client-side, no uploads. Your files never leave your browser. Try it now!">
+    <meta name="keywords" content="PDF tool, merge PDF, split PDF, compress PDF, PDF to image, image to PDF, free PDF editor, online PDF converter, PDF toolkit, read PDF aloud">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://pdfcraft.app/">
+    <!-- Open Graph -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="PDFCraft — Free Online PDF Toolkit">
+    <meta property="og:description" content="Merge, split, compress & convert PDFs — 100% free, right in your browser. No uploads. No server. Your files never leave your device.">
+    <meta property="og:url" content="https://pdfcraft.app/">
+    <meta property="og:site_name" content="PDFCraft">
+    <meta property="og:image" content="https://pdfcraft.app/og-image.png">
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="PDFCraft — Free Online PDF Toolkit">
+    <meta name="twitter:description" content="Merge, split, compress & convert PDFs — 100% free, right in your browser. No uploads needed.">
+    <meta name="twitter:image" content="https://pdfcraft.app/og-image.png">
+    <!-- JSON-LD Structured Data -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "WebApplication",
+        "name": "PDFCraft",
+        "url": "https://pdfcraft.app/",
+        "description": "Free online PDF toolkit to merge, split, compress, convert PDFs and images. 100% client-side with no uploads required.",
+        "applicationCategory": "UtilitiesApplication",
+        "operatingSystem": "All",
+        "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "USD"
+        },
+        "featureList": "Merge PDFs, Split PDF, Compress PDF, Convert Images to PDF, Convert PDF to Images, Read PDF Aloud"
+    }
+    </script>
+    <!-- Google Analytics (GA4) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-XXXXXXXXXX');
+    </script>
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <link rel="stylesheet" href="style.css">
+    <script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <script>
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-inner">
+            <div class="logo">
+                <div class="logo-icon">
+                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                        <polyline points="14 2 14 8 20 8"/>
+                        <line x1="12" y1="18" x2="12" y2="12"/>
+                        <polyline points="9 15 12 18 15 15"/>
+                    </svg>
+                </div>
+                <span class="logo-text">PDF<strong>Craft</strong></span>
+            </div>
+            <nav class="nav-tabs">
+                <a href="pricing.html" class="nav-tab" style="text-decoration:none;">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                    Pricing
+                </a>
+                <button class="nav-tab active" data-tool="merge">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+                    Merge
+                </button>
+                <button class="nav-tab" data-tool="split">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14"/><path d="M12 5l7 7-7 7"/></svg>
+                    Split
+                </button>
+                <button class="nav-tab" data-tool="compress">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="4 14 10 14 10 20"/><polyline points="20 10 14 10 14 4"/><line x1="14" y1="10" x2="21" y2="3"/><line x1="3" y1="21" x2="10" y2="14"/></svg>
+                    Compress
+                </button>
+                <button class="nav-tab" data-tool="convert">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 3 21 3 21 8"/><line x1="4" y1="20" x2="21" y2="3"/><polyline points="21 16 21 21 16 21"/><line x1="15" y1="15" x2="21" y2="21"/></svg>
+                    Convert
+                </button>
+                <button class="nav-tab" data-tool="read">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
+                    Read Aloud
+                </button>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Hero -->
+    <section class="hero">
+        <h1>All-in-One <span class="gradient-text">PDF Toolkit</span></h1>
+        <p>Merge, split, compress & convert PDFs — 100% free, right in your browser. No uploads. No server. Your files never leave your device.</p>
+    </section>
+
+    <!-- SEO Content -->
+    <section class="seo-content">
+        <h2>Why PDFCraft?</h2>
+        <p>PDFCraft is a free, browser-based PDF toolkit that lets you merge, split, compress, and convert PDF files without uploading them to any server. All processing happens locally in your browser using JavaScript, ensuring your documents stay private. Whether you need to combine multiple PDFs into one, extract specific pages, reduce file size, or convert between images and PDFs, PDFCraft handles it all instantly. No sign-up required. No watermarks. No limits on the free tier.</p>
+    </section>
+
+    <!-- Main Content -->
+    <main class="main">
+        <!-- MERGE -->
+        <div class="tool-panel active" id="tool-merge">
+            <div class="tool-header">
+                <div class="tool-icon merge-icon">
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+                </div>
+                <div>
+                    <h2>Merge PDFs</h2>
+                    <p>Combine multiple PDF files into a single document.</p>
+                </div>
+            </div>
+            <div class="upload-zone" id="merge-dropzone">                    <input type="file" id="merge-input" accept=".pdf" multiple hidden aria-label="Upload PDF files to merge">
+                <div class="upload-icon">
+                    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                </div>
+                <p class="upload-text">Drop PDFs here or <span class="browse-link">browse</span></p>
+                <p class="upload-hint">Select multiple files to merge them</p>
+            </div>
+            <div class="file-list" id="merge-files"></div>
+            <div class="action-bar">
+                <button class="btn-primary" id="merge-btn" disabled>
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                    Merge & Download
+                </button>
+            </div>
+        </div>
+
+        <!-- SPLIT -->
+        <div class="tool-panel" id="tool-split">
+            <div class="tool-header">
+                <div class="tool-icon split-icon">
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14"/><path d="M12 5l7 7-7 7"/></svg>
+                </div>
+                <div>
+                    <h2>Split PDF</h2>
+                    <p>Extract specific pages or ranges from a PDF document.</p>
+                </div>
+            </div>
+            <div class="upload-zone" id="split-dropzone">                    <input type="file" id="split-input" accept=".pdf" hidden aria-label="Upload a PDF file to split">
+                <div class="upload-icon">
+                    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                </div>
+                <p class="upload-text">Drop a PDF here or <span class="browse-link">browse</span></p>
+                <p class="upload-hint">Select one PDF to split into multiple files</p>
+            </div>
+            <div class="file-info" id="split-file-info"></div>
+            <div class="split-controls" id="split-controls" style="display:none;">
+                <div class="page-preview-grid" id="split-pages"></div>
+                <div class="split-options">
+                    <div class="option-group">
+                        <label class="option-label">Split Mode</label>
+                        <div class="radio-group">
+                            <label class="radio-option">
+                                <input type="radio" name="split-mode" value="ranges" checked aria-label="Split by page ranges">
+                                <span class="radio-mark"></span>
+                                Page Ranges
+                            </label>
+                            <label class="radio-option">
+                                <input type="radio" name="split-mode" value="individual" aria-label="Split into individual pages">
+                                <span class="radio-mark"></span>
+                                Each Page
+                            </label>
+                        </div>
+                    </div>
+                    <div class="option-group" id="range-input-group">
+                        <label class="option-label">Page Ranges</label>
+                        <p class="option-hint">Enter ranges like 1-3, 5, 7-9. Each range creates a separate PDF. Or click pages below to toggle selection.</p>
+                        <input type="text" class="text-input" id="split-ranges" placeholder="e.g. 1-3, 5, 7-9" aria-label="Page ranges to extract">
+                    </div>
+                </div>
+            </div>
+            <div class="action-bar">
+                <button class="btn-primary" id="split-btn" disabled>
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                    Split & Download
+                </button>
+            </div>
+        </div>
+
+        <!-- COMPRESS -->
+        <div class="tool-panel" id="tool-compress">
+            <div class="tool-header">
+                <div class="tool-icon compress-icon">
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="4 14 10 14 10 20"/><polyline points="20 10 14 10 14 4"/><line x1="14" y1="10" x2="21" y2="3"/><line x1="3" y1="21" x2="10" y2="14"/></svg>
+                </div>
+                <div>
+                    <h2>Compress PDF</h2>
+                    <p>Reduce PDF file size by removing metadata and optimizing content.</p>
+                </div>
+            </div>
+            <div class="upload-zone" id="compress-dropzone">                    <input type="file" id="compress-input" accept=".pdf" hidden aria-label="Upload a PDF file to compress">
+                <div class="upload-icon">
+                    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                </div>
+                <p class="upload-text">Drop a PDF here or <span class="browse-link">browse</span></p>
+                <p class="upload-hint">Select one PDF to compress</p>
+            </div>
+            <div class="file-info" id="compress-file-info"></div>
+            <div class="compress-controls" id="compress-controls" style="display:none;">
+                <div class="compress-options">
+                    <div class="option-group">
+                        <label class="option-label">Compression Level</label>
+                        <div class="radio-group">
+                            <label class="radio-option">
+                                <input type="radio" name="compress-level" value="low" aria-label="Low compression">
+                                <span class="radio-mark"></span>
+                                <div>
+                                    <strong>Low</strong>
+                                    <small>Best quality, minimal size reduction</small>
+                                </div>
+                            </label>
+                            <label class="radio-option">
+                                <input type="radio" name="compress-level" value="medium" checked aria-label="Medium compression">
+                                <span class="radio-mark"></span>
+                                <div>
+                                    <strong>Medium</strong>
+                                    <small>Good balance of quality and size</small>
+                                </div>
+                            </label>
+                            <label class="radio-option">
+                                <input type="radio" name="compress-level" value="high" aria-label="High compression">
+                                <span class="radio-mark"></span>
+                                <div>
+                                    <strong>High</strong>
+                                    <small>Smallest file, lower quality</small>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+                    <label class="checkbox-option">
+                        <input type="checkbox" id="compress-metadata" checked aria-label="Remove PDF metadata">
+                        <span class="checkmark"></span>
+                        Remove metadata (author, title, creator)
+                    </label>
+                </div>
+                <div class="compress-preview">
+                    <div class="stat-card">
+                        <span class="stat-label">Original Size</span>
+                        <span class="stat-value" id="compress-original-size">—</span>
+                    </div>
+                    <div class="stat-arrow">→</div>
+                    <div class="stat-card">
+                        <span class="stat-label">Estimated Size</span>
+                        <span class="stat-value accent" id="compress-estimated-size">—</span>
+                    </div>
+                    <div class="stat-card savings">
+                        <span class="stat-label">Savings</span>
+                        <span class="stat-value green" id="compress-savings">—</span>
+                    </div>
+                </div>
+            </div>
+            <div class="action-bar">
+                <button class="btn-primary" id="compress-btn" disabled>
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="4 14 10 14 10 20"/><polyline points="20 10 14 10 14 4"/></svg>
+                    Compress & Download
+                </button>
+            </div>
+        </div>
+
+        <!-- CONVERT -->
+        <div class="tool-panel" id="tool-convert">
+            <div class="tool-header">
+                <div class="tool-icon convert-icon">
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 3 21 3 21 8"/><line x1="4" y1="20" x2="21" y2="3"/><polyline points="21 16 21 21 16 21"/><line x1="15" y1="15" x2="21" y2="21"/></svg>
+                </div>
+                <div>
+                    <h2>Convert</h2>
+                    <p>Convert images to PDF or PDF pages to images.</p>
+                </div>
+            </div>
+            <div class="convert-modes">
+                <button class="mode-btn active" data-mode="img2pdf">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                    Images → PDF
+                </button>
+                <button class="mode-btn" data-mode="pdf2img">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>
+                    PDF → Images
+                </button>
+            </div>
+            <!-- Image to PDF -->
+            <div class="convert-panel active" id="convert-img2pdf">
+                <div class="upload-zone" id="img2pdf-dropzone">
+                    <input type="file" id="img2pdf-input" accept="image/*" multiple hidden aria-label="Upload images to convert to PDF">
+                    <div class="upload-icon">
+                        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                    </div>
+                    <p class="upload-text">Drop images here or <span class="browse-link">browse</span></p>
+                    <p class="upload-hint">Supports JPG, PNG, GIF, BMP, WebP</p>
+                </div>
+                <div class="file-list" id="img2pdf-files"></div>
+                <div class="action-bar">
+                    <button class="btn-primary" id="img2pdf-btn" disabled>
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                        Create PDF
+                    </button>
+                </div>
+            </div>
+            <!-- PDF to Image -->
+            <div class="convert-panel" id="convert-pdf2img">
+                <div class="upload-zone" id="pdf2img-dropzone">
+                    <input type="file" id="pdf2img-input" accept=".pdf" hidden aria-label="Upload a PDF file to extract images">
+                    <div class="upload-icon">
+                        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                    </div>
+                    <p class="upload-text">Drop a PDF here or <span class="browse-link">browse</span></p>
+                    <p class="upload-hint">Each page will be converted to a PNG image</p>
+                </div>
+                <div class="file-info" id="pdf2img-file-info"></div>
+                <div class="pdf2img-controls" id="pdf2img-controls" style="display:none;">
+                    <div class="option-group">
+                        <label class="option-label">Output Format</label>
+                        <div class="radio-group">
+                            <label class="radio-option">
+                                <input type="radio" name="img-format" value="png" checked aria-label="Export as PNG">
+                                <span class="radio-mark"></span>
+                                PNG (lossless, larger files)
+                            </label>
+                            <label class="radio-option">
+                                <input type="radio" name="img-format" value="jpeg" aria-label="Export as JPEG">
+                                <span class="radio-mark"></span>
+                                JPEG (compressed, smaller files)
+                            </label>
+                        </div>
+                    </div>
+                    <div class="option-group">
+                        <label class="option-label">Resolution Scale</label>
+                        <div class="radio-group">
+                            <label class="radio-option">
+                                <input type="radio" name="img-scale" value="1" aria-label="1x resolution (72 DPI)">
+                                <span class="radio-mark"></span>
+                                <div>
+                                    <strong>1x (72 DPI)</strong>
+                                    <small>Screen quality, fast</small>
+                                </div>
+                            </label>
+                            <label class="radio-option">
+                                <input type="radio" name="img-scale" value="2" checked aria-label="2x resolution (144 DPI)">
+                                <span class="radio-mark"></span>
+                                <div>
+                                    <strong>2x (144 DPI)</strong>
+                                    <small>Good quality, recommended</small>
+                                </div>
+                            </label>
+                            <label class="radio-option">
+                                <input type="radio" name="img-scale" value="3" aria-label="3x resolution (216 DPI)">
+                                <span class="radio-mark"></span>
+                                <div>
+                                    <strong>3x (216 DPI)</strong>
+                                    <small>Print quality, large files</small>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+                    <label class="checkbox-option">
+                        <input type="checkbox" id="pdf2img-zip" checked aria-label="Download as ZIP file">
+                        <span class="checkmark"></span>
+                        Download all as ZIP file
+                    </label>
+                    <div class="select-actions">
+                        <button type="button" class="btn-link" id="pdf2img-select-all">Select All</button>
+                        <span class="select-divider">|</span>
+                        <button type="button" class="btn-link" id="pdf2img-deselect-all">Deselect All</button>
+                    </div>
+                    <div class="page-preview-grid" id="pdf2img-pages"></div>
+                </div>
+                <div class="progress-container" id="pdf2img-progress" style="display:none;">
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="pdf2img-progress-fill"></div>
+                    </div>
+                    <span class="progress-text" id="pdf2img-progress-text">Rendering page 1 of 1...</span>
+                </div>
+                <div class="action-bar">
+                    <button class="btn-primary" id="pdf2img-btn" disabled>
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                        Extract Images
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- READ ALOUD -->
+        <div class="tool-panel" id="tool-read">
+            <div class="tool-header">
+                <div class="tool-icon read-icon">
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
+                </div>
+                <div>
+                    <h2>Read Aloud</h2>
+                    <p>Extract text from a PDF and have it read aloud using text-to-speech.</p>
+                </div>
+            </div>
+            <div class="upload-zone" id="read-dropzone">
+                <input type="file" id="read-input" accept=".pdf" hidden aria-label="Upload a PDF to read aloud">
+                <div class="upload-icon">
+                    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                </div>
+                <p class="upload-text">Drop a PDF here or <span class="browse-link">browse</span></p>
+                <p class="upload-hint">Text will be extracted and read aloud</p>
+            </div>
+            <div class="file-info" id="read-file-info"></div>
+            <div class="tts-controls" id="tts-controls" style="display:none;">
+                <div class="tts-options">
+                    <div class="option-group">
+                        <label class="option-label">Voice</label>
+                        <select class="text-input" id="tts-voice" aria-label="Select voice"></select>
+                    </div>
+                    <div class="option-group">
+                        <label class="option-label">Speed</label>
+                        <div class="speed-control">
+                            <input type="range" id="tts-rate" min="0.5" max="2" step="0.1" value="1" class="range-input" aria-label="Speech rate">
+                            <span class="speed-value" id="tts-rate-value">1.0x</span>
+                        </div>
+                    </div>
+                    <div class="option-group">
+                        <label class="option-label">Pitch</label>
+                        <div class="speed-control">
+                            <input type="range" id="tts-pitch" min="0.5" max="2" step="0.1" value="1" class="range-input" aria-label="Speech pitch">
+                            <span class="speed-value" id="tts-pitch-value">1.0</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="text-display" id="tts-text-display">
+                    <p class="text-placeholder">Extracted text will appear here...</p>
+                </div>
+                <div class="tts-playback">
+                    <button class="btn-icon" id="tts-play" aria-label="Play">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                    </button>
+                    <button class="btn-icon" id="tts-pause" aria-label="Pause" disabled>
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
+                    </button>
+                    <button class="btn-icon" id="tts-stop" aria-label="Stop" disabled>
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="6" width="12" height="12"/></svg>
+                    </button>
+                    <div class="tts-progress-container">
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="tts-progress-fill"></div>
+                        </div>
+                        <span class="progress-text" id="tts-progress-text">Ready</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Processing Overlay -->
+    <div class="overlay" id="processing-overlay">
+        <div class="spinner"></div>
+        <p>Processing your files...</p>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer" role="contentinfo">
+        <div class="footer-inner">
+            <p>PDFCraft — 100% client-side. Your files never leave your browser.</p>
+            <p class="footer-sub">No server uploads. No data collection. Completely private.</p>
+            <nav class="footer-links">
+                <a href="index.html">Home</a>
+                <a href="pricing.html">Pricing</a>
+                <a href="sitemap.xml">Sitemap</a>
+            </nav>
+        </div>
+    </footer>
+
+    <script src="app.js"></script>
+</body>
+</html>
