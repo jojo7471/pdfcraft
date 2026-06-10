@@ -943,25 +943,28 @@ async function downloadAsAudio() {
         await new Promise(r => setTimeout(r, 800));
 
         // Request tab audio capture
+        // suppressLocalAudioPlayback prevents audio from playing through speakers
         const stream = await navigator.mediaDevices.getDisplayMedia({
             video: { displaySurface: 'browser' },
-            audio: true,
+            audio: { suppressLocalAudioPlayback: silentRecord },
             preferCurrentTab: true,
         });
 
         // Stop video track immediately (we only need audio)
         stream.getVideoTracks().forEach(t => t.stop());
 
-        // Apply silent recording after stream creation (more reliable)
+        // Also apply via applyConstraints for browsers that need post-creation application
         if (silentRecord) {
             const audioTrack = stream.getAudioTracks()[0];
             if (audioTrack) {
                 try {
                     await audioTrack.applyConstraints({ suppressLocalAudioPlayback: true });
                 } catch (e) {
-                    console.warn('Could not suppress local audio playback:', e);
+                    console.warn('Could not apply suppressLocalAudioPlayback:', e);
                 }
             }
+            // Warn user if silent mode may not work
+            showToast('Silent recording active. If you still hear audio, your browser may not fully support this feature.', 'info');
         }
 
         // Check for audio track
