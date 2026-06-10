@@ -963,8 +963,7 @@ async function downloadAsAudio() {
                     console.warn('Could not apply suppressLocalAudioPlayback:', e);
                 }
             }
-            // Warn user if silent mode may not work
-            showToast('Silent recording active. If you still hear audio, your browser may not fully support this feature.', 'info');
+
         }
 
         // Check for audio track
