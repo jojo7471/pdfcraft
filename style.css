@@ -1267,6 +1267,51 @@ body {
     gap: 6px;
 }
 
+/* ===== Download Audio ===== */
+.download-hint {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    text-align: right;
+    margin-top: 6px;
+}
+
+#tts-download {
+    position: relative;
+    overflow: hidden;
+}
+
+#tts-download.recording {
+    background: #e74c3c;
+    box-shadow: 0 2px 12px rgba(231, 76, 60, 0.3);
+    animation: recordPulse 1.5s ease infinite;
+}
+
+#tts-download.recording span::before {
+    content: '';
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    background: #ff6b6b;
+    border-radius: 50%;
+    margin-right: 8px;
+    animation: recordBlink 1s ease infinite;
+}
+
+@keyframes recordPulse {
+    0%, 100% { box-shadow: 0 2px 12px rgba(231, 76, 60, 0.3); }
+    50% { box-shadow: 0 2px 24px rgba(231, 76, 60, 0.5); }
+}
+
+@keyframes recordBlink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+}
+
+.toast-info {
+    border-color: rgba(108, 92, 231, 0.3);
+    background: rgba(108, 92, 231, 0.08);
+}
+
 /* ===== Progress Bar ===== */
 .progress-container {
     display: flex;

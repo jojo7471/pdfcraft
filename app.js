@@ -613,10 +613,12 @@ document.getElementById('pdf2img-btn').addEventListener('click', async () => {
 // ====================================================
 let ttsUtterance = null;
 let ttsSpeaking = false;
+let ttsPaused = false;
 let ttsText = '';
 let ttsChunks = [];
 let ttsChunkIndex = 0;
 let ttsStopped = false;
+let ttsFileName = '';
 const CHUNK_SIZE = 4000;
 
 function populateVoices() {
@@ -643,8 +645,9 @@ speechSynthesis.onvoiceschanged = populateVoices;
 populateVoices();
 
 // Chrome bug workaround: keep speechSynthesis alive
+// But don't interfere if the user has paused playback or we're recording
 setInterval(() => {
-    if (speechSynthesis.speaking) {
+    if (speechSynthesis.speaking && !ttsPaused && !isRecording) {
         speechSynthesis.pause();
         speechSynthesis.resume();
     }
@@ -668,6 +671,8 @@ setupDropZone('read-dropzone', 'read-input', async (files) => {
     // Stop any ongoing speech
     speechSynthesis.cancel();
     ttsSpeaking = false;
+    ttsPaused = false;
+    ttsFileName = file.name;
     updatePlaybackUI();
 
     const info = document.getElementById('read-file-info');
@@ -702,9 +707,11 @@ setupDropZone('read-dropzone', 'read-input', async (files) => {
             : '<p class="text-placeholder">No text found in this PDF. It may be a scanned/image-based document.</p>';
 
         document.getElementById('tts-controls').style.display = 'flex';
+        document.getElementById('tts-download-bar').style.display = 'flex';
         document.getElementById('tts-play').disabled = !ttsText;
         document.getElementById('tts-pause').disabled = true;
         document.getElementById('tts-stop').disabled = true;
+        document.getElementById('tts-download').disabled = !ttsText;
         document.getElementById('tts-progress-text').textContent = ttsText ? 'Ready to play' : 'No text found';
     } catch (err) {
         showToast('Error extracting text: ' + err.message);
@@ -748,33 +755,28 @@ function updatePlaybackUI() {
     const playBtn = document.getElementById('tts-play');
     const pauseBtn = document.getElementById('tts-pause');
     const stopBtn = document.getElementById('tts-stop');
-    if (ttsSpeaking) {
+    if (ttsSpeaking || ttsPaused) {
         playBtn.classList.add('playing');
         pauseBtn.disabled = false;
         stopBtn.disabled = false;
+        // Update pause button icon to show play/pause state
+        if (ttsPaused) {
+            pauseBtn.innerHTML = '<svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>';
+        } else {
+            pauseBtn.innerHTML = '<svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>';
+        }
     } else {
         playBtn.classList.remove('playing');
         pauseBtn.disabled = !ttsText;
         stopBtn.disabled = true;
+        // Reset pause button icon
+        pauseBtn.innerHTML = '<svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>';
     }
 }
 
-// Play
+// Play / Resume
 document.getElementById('tts-play').addEventListener('click', () => {
     if (!ttsText) return;
-
-    // Resume if paused
-    if (speechSynthesis.paused) {
-        speechSynthesis.resume();
-        ttsSpeaking = true;
-        updatePlaybackUI();
-        return;
-    }
-
-    // Stop any current speech
-    if (speechSynthesis.speaking) {
-        speechSynthesis.cancel();
-    }
 
     // Check SpeechSynthesis support
     if (!window.speechSynthesis) {
@@ -788,85 +790,321 @@ document.getElementById('tts-play').addEventListener('click', () => {
         return;
     }
 
+    // Resume if paused — we track pause ourselves because Chrome's
+    // speechSynthesis.pause() is unreliable.
+    if (ttsPaused) {
+        ttsPaused = false;
+        ttsStopped = false;
+        // Resume from the chunk we were on (delay needed after cancel)
+        setTimeout(() => speakChunk(), 150);
+        return;
+    }
+
+    // Stop any current speech before starting fresh
+    if (speechSynthesis.speaking || speechSynthesis.paused) {
+        ttsStopped = true;
+        speechSynthesis.cancel();
+    }
+
     // Chunk the text to avoid Chrome's ~15k char limit
     ttsChunks = chunkText(ttsText, CHUNK_SIZE);
     ttsChunkIndex = 0;
     ttsStopped = false;
-
-    function speakChunk() {
-        if (ttsChunkIndex >= ttsChunks.length) {
-            ttsSpeaking = false;
-            updatePlaybackUI();
-            document.getElementById('tts-progress-fill').style.width = '100%';
-            document.getElementById('tts-progress-text').textContent = 'Finished';
-            return;
-        }
-
-        const chunk = ttsChunks[ttsChunkIndex];
-        ttsUtterance = new SpeechSynthesisUtterance(chunk);
-        const voices = speechSynthesis.getVoices();
-        const voiceIdx = parseInt(document.getElementById('tts-voice').value);
-        if (voices[voiceIdx]) ttsUtterance.voice = voices[voiceIdx];
-        ttsUtterance.rate = parseFloat(document.getElementById('tts-rate').value);
-        ttsUtterance.pitch = parseFloat(document.getElementById('tts-pitch').value);
-
-        ttsUtterance.onstart = () => {
-            ttsSpeaking = true;
-            updatePlaybackUI();
-        };
-        ttsUtterance.onend = () => {
-            if (ttsStopped) return;
-            ttsChunkIndex++;
-            // Update progress on chunk completion
-            const pct = Math.min(99, Math.round((ttsChunkIndex / ttsChunks.length) * 100));
-            document.getElementById('tts-progress-fill').style.width = pct + '%';
-            document.getElementById('tts-progress-text').textContent = `${pct}%`;
-            speakChunk();
-        };
-        ttsUtterance.onerror = (e) => {
-            console.error('TTS error:', e.error);
-            ttsSpeaking = false;
-            updatePlaybackUI();
-            if (e.error !== 'canceled') {
-                showToast('TTS error: ' + e.error);
-            }
-        };
-        ttsUtterance.onboundary = () => {
-            const pct = Math.min(99, Math.round(((ttsChunkIndex + 0.5) / ttsChunks.length) * 100));
-            document.getElementById('tts-progress-fill').style.width = pct + '%';
-            document.getElementById('tts-progress-text').textContent = `${pct}%`;
-        };
-
-        const totalChunks = ttsChunks.length;
-        document.getElementById('tts-progress-text').textContent = totalChunks > 1
-            ? `Speaking chunk ${ttsChunkIndex + 1} of ${totalChunks}...`
-            : 'Speaking...';
-
-        speechSynthesis.speak(ttsUtterance);
-    }
+    ttsPaused = false;
 
     // Chrome bug workaround: delay speak() after cancel()
     setTimeout(speakChunk, 150);
 });
 
-// Pause
-document.getElementById('tts-pause').addEventListener('click', () => {
-    if (speechSynthesis.speaking) {
-        speechSynthesis.pause();
+function speakChunk() {
+    if (ttsStopped || ttsPaused) return;
+
+    if (ttsChunkIndex >= ttsChunks.length) {
         ttsSpeaking = false;
+        ttsPaused = false;
         updatePlaybackUI();
+        document.getElementById('tts-progress-fill').style.width = '100%';
+        document.getElementById('tts-progress-text').textContent = 'Finished';
+        return;
+    }
+
+    const chunk = ttsChunks[ttsChunkIndex];
+    ttsUtterance = new SpeechSynthesisUtterance(chunk);
+    const voices = speechSynthesis.getVoices();
+    const voiceIdx = parseInt(document.getElementById('tts-voice').value);
+    if (voices[voiceIdx]) ttsUtterance.voice = voices[voiceIdx];
+    ttsUtterance.rate = parseFloat(document.getElementById('tts-rate').value);
+    ttsUtterance.pitch = parseFloat(document.getElementById('tts-pitch').value);
+
+    ttsUtterance.onstart = () => {
+        ttsSpeaking = true;
+        ttsPaused = false;
+        updatePlaybackUI();
+    };
+    ttsUtterance.onend = () => {
+        // If we cancelled due to pause, don't advance — the pause handler
+        // already saved ttsChunkIndex.
+        if (ttsPaused) return;
+        if (ttsStopped) return;
+        ttsChunkIndex++;
+        // Update progress on chunk completion
+        const pct = Math.min(99, Math.round((ttsChunkIndex / ttsChunks.length) * 100));
+        document.getElementById('tts-progress-fill').style.width = pct + '%';
+        document.getElementById('tts-progress-text').textContent = `${pct}%`;
+        speakChunk();
+    };
+    ttsUtterance.onerror = (e) => {
+        // 'canceled' is expected when we cancel() for pause or stop
+        if (e.error === 'canceled') return;
+        console.error('TTS error:', e.error);
+        ttsSpeaking = false;
+        ttsPaused = false;
+        updatePlaybackUI();
+        showToast('TTS error: ' + e.error);
+    };
+    ttsUtterance.onboundary = () => {
+        const pct = Math.min(99, Math.round(((ttsChunkIndex + 0.5) / ttsChunks.length) * 100));
+        document.getElementById('tts-progress-fill').style.width = pct + '%';
+        document.getElementById('tts-progress-text').textContent = `${pct}%`;
+    };
+
+    const totalChunks = ttsChunks.length;
+    document.getElementById('tts-progress-text').textContent = totalChunks > 1
+        ? `Speaking chunk ${ttsChunkIndex + 1} of ${totalChunks}...`
+        : 'Speaking...';
+
+    speechSynthesis.speak(ttsUtterance);
+}
+
+// Pause — Chrome's speechSynthesis.pause() is unreliable, so we
+// cancel the current utterance and remember which chunk we were on,
+// then resume from there when Play is pressed again.
+document.getElementById('tts-pause').addEventListener('click', () => {
+    if (ttsPaused) {
+        // Already paused — treat as resume
+        ttsPaused = false;
+        ttsStopped = false;
+        // Delay needed after cancel for Chrome
+        setTimeout(() => speakChunk(), 150);
+        return;
+    }
+    if (speechSynthesis.speaking) {
+        ttsPaused = true;
+        ttsSpeaking = false;
+        // Cancel the current speech; onend will see ttsPaused and skip advancing
+        speechSynthesis.cancel();
+        updatePlaybackUI();
+        document.getElementById('tts-progress-text').textContent = 'Paused';
     }
 });
 
 // Stop
 document.getElementById('tts-stop').addEventListener('click', () => {
     ttsStopped = true;
+    ttsPaused = false;
+    ttsChunkIndex = 0;
     speechSynthesis.cancel();
     ttsSpeaking = false;
     updatePlaybackUI();
     document.getElementById('tts-progress-fill').style.width = '0%';
     document.getElementById('tts-progress-text').textContent = 'Ready';
 });
+
+// ====================================================
+// DOWNLOAD AS AUDIO (PDF → Audio file via TTS recording)
+// ====================================================
+let isRecording = false;
+
+document.getElementById('tts-download').addEventListener('click', downloadAsAudio);
+
+async function downloadAsAudio() {
+    if (!ttsText || isRecording) return;
+
+    // Check support
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getDisplayMedia) {
+        showToast('Audio recording is not supported in this browser. Try Chrome or Edge.');
+        return;
+    }
+
+    // Stop any current speech
+    if (speechSynthesis.speaking || speechSynthesis.paused) {
+        ttsStopped = true;
+        ttsPaused = false;
+        speechSynthesis.cancel();
+        await new Promise(r => setTimeout(r, 200));
+    }
+
+    try {
+        showToast('Select this tab in the popup and check "Share tab audio", then click Share.', 'info');
+        await new Promise(r => setTimeout(r, 800));
+
+        // Request tab audio capture
+        const stream = await navigator.mediaDevices.getDisplayMedia({
+            video: { displaySurface: 'browser' },
+            audio: { suppressLocalAudioPlayback: false },
+            preferCurrentTab: true,
+        });
+
+        // Stop video track immediately (we only need audio)
+        stream.getVideoTracks().forEach(t => t.stop());
+
+        // Check for audio track
+        const audioTracks = stream.getAudioTracks();
+        if (audioTracks.length === 0) {
+            stream.getTracks().forEach(t => t.stop());
+            showToast('No audio track. Please check "Share tab audio" when sharing.');
+            return;
+        }
+
+        // Create MediaRecorder
+        const mimeType = MediaRecorder.isTypeSupported('audio/webm;codecs=opus')
+            ? 'audio/webm;codecs=opus'
+            : 'audio/webm';
+
+        const mediaRecorder = new MediaRecorder(stream, { mimeType });
+        const audioChunks = [];
+
+        mediaRecorder.ondataavailable = (e) => {
+            if (e.data.size > 0) audioChunks.push(e.data);
+        };
+
+        mediaRecorder.onstop = () => {
+            stream.getTracks().forEach(t => t.stop());
+
+            if (audioChunks.length === 0) {
+                showToast('No audio was recorded.');
+                isRecording = false;
+                updateDownloadUI();
+                return;
+            }
+
+            const blob = new Blob(audioChunks, { type: mimeType });
+            const baseName = ttsFileName ? ttsFileName.replace(/\.pdf$/i, '') : 'pdfcraft-audio';
+            downloadBlob(blob, baseName + '.webm');
+            showToast(`Audio file downloaded! (${formatBytes(blob.size)})`, 'success');
+
+            isRecording = false;
+            updateDownloadUI();
+        };
+
+        mediaRecorder.onerror = (e) => {
+            console.error('MediaRecorder error:', e.error);
+            stream.getTracks().forEach(t => t.stop());
+            isRecording = false;
+            updateDownloadUI();
+            showToast('Recording error: ' + e.error);
+        };
+
+        // Start recording
+        mediaRecorder.start(100);
+        isRecording = true;
+        updateDownloadUI();
+
+        // Speak all chunks and wait for completion
+        await speakAllChunksForRecording();
+
+        // Small delay to capture trailing audio
+        await new Promise(r => setTimeout(r, 500));
+
+        // Stop recording
+        if (mediaRecorder.state === 'recording') {
+            mediaRecorder.stop();
+        }
+
+    } catch (err) {
+        isRecording = false;
+        updateDownloadUI();
+
+        if (err.name === 'NotAllowedError') {
+            showToast('Audio sharing was denied. Please allow tab audio sharing to record.');
+        } else if (err.name === 'NotSupportedError') {
+            showToast('Audio recording is not supported in this browser.');
+        } else {
+            showToast('Error: ' + err.message);
+        }
+    }
+}
+
+// Speak all TTS chunks sequentially, returning a Promise that resolves when done
+function speakAllChunksForRecording() {
+    return new Promise((resolve) => {
+        const chunks = chunkText(ttsText, CHUNK_SIZE);
+        let idx = 0;
+
+        function speakNext() {
+            if (!isRecording || idx >= chunks.length) {
+                ttsSpeaking = false;
+                updateDownloadUI();
+                document.getElementById('tts-progress-fill').style.width = '100%';
+                document.getElementById('tts-progress-text').textContent = 'Recording complete!';
+                resolve();
+                return;
+            }
+
+            const chunk = chunks[idx];
+            const utt = new SpeechSynthesisUtterance(chunk);
+            const voices = speechSynthesis.getVoices();
+            const voiceIdx = parseInt(document.getElementById('tts-voice').value);
+            if (voices[voiceIdx]) utt.voice = voices[voiceIdx];
+            utt.rate = parseFloat(document.getElementById('tts-rate').value);
+            utt.pitch = parseFloat(document.getElementById('tts-pitch').value);
+
+            utt.onstart = () => {
+                ttsSpeaking = true;
+                updateDownloadUI();
+            };
+
+            utt.onend = () => {
+                idx++;
+                const pct = Math.min(99, Math.round((idx / chunks.length) * 100));
+                document.getElementById('tts-progress-fill').style.width = pct + '%';
+                const totalChunks = chunks.length;
+                document.getElementById('tts-progress-text').textContent = totalChunks > 1
+                    ? `Recording ${idx} of ${totalChunks}...`
+                    : 'Recording...';
+                speakNext();
+            };
+
+            utt.onerror = (e) => {
+                if (e.error === 'canceled') { resolve(); return; }
+                console.error('TTS recording error:', e.error);
+                // On unexpected error, still resolve so MediaRecorder can stop cleanly
+                idx = chunks.length; // stop further chunks
+                resolve();
+            };
+
+            const totalChunks = chunks.length;
+            document.getElementById('tts-progress-text').textContent = totalChunks > 1
+                ? `Recording 1 of ${totalChunks}...`
+                : 'Recording...';
+
+            speechSynthesis.speak(utt);
+        }
+
+        speakNext();
+    });
+}
+
+function updateDownloadUI() {
+    const downloadBtn = document.getElementById('tts-download');
+    const downloadBar = document.getElementById('tts-download-bar');
+
+    if (isRecording) {
+        downloadBtn.disabled = true;
+        downloadBtn.classList.add('recording');
+        downloadBtn.querySelector('span').textContent = 'Recording...';
+        // Disable playback controls during recording
+        document.getElementById('tts-play').disabled = true;
+        document.getElementById('tts-pause').disabled = true;
+        document.getElementById('tts-stop').disabled = true;
+    } else {
+        downloadBtn.disabled = !ttsText;
+        downloadBtn.classList.remove('recording');
+        downloadBtn.querySelector('span').textContent = 'Download as Audio';
+        // Re-enable playback controls
+        updatePlaybackUI();
+    }
+}
 
 // ===== Init =====
 document.addEventListener('DOMContentLoaded', () => {
